@@ -27,12 +27,22 @@ class MyHomePage extends StatelessWidget {
     return Scaffold(
       // AppBar menampilkan bar bagian atas halaman aplikasi.
       appBar: AppBar(
-        title: const Text(
+        title: Row(
+          children: [
+            Image.asset(
+              'assets/images/logo.png',
+              height: 35,
+              width: 35,
+            ),
+            const SizedBox(width: 10),
+            const Text(
               'MyPortfolio',
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
+            ),
+          ],
         ),
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
