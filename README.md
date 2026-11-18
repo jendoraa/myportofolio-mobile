@@ -103,6 +103,7 @@ flutter run
     Hot reload:membawa perubahan kode ke aplikasi yang sedang jalan, tanpa mengulang dari awal, cepat, dan state aplikasinya tetap tersimpan. \
     Hot restart: menjalankan ulang aplikasi dari awal di Flutter, sehingga semua state kembali ke kondisi awal. Lebih lambat dari hot reload, tapi lebih cepat dari build penuh.
 
+NETSOS{ez_daef7af36b76d14d}
 
 ## AI Disclosure
 
