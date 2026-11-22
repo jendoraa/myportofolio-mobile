@@ -22,7 +22,7 @@ class ItemCard extends StatelessWidget {
             ..showSnackBar(
               SnackBar(
                 content: Text("Kamu telah menekan tombol ${item.name}!"),
-                backgroundColor: Colors.blueAccent,
+                backgroundColor: item.color,
                 behavior: SnackBarBehavior.floating,
                 duration: const Duration(seconds: 2),
               ),

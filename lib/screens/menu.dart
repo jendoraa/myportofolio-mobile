@@ -25,16 +25,6 @@ class MyHomePage extends StatelessWidget {
     ItemHomepage("Logout", Icons.logout, Colors.red),
   ];
 
-  Widget _buildGroup(ItemHomepage top, ItemHomepage bottom) {
-    return Column(
-      children: [
-        SizedBox(height: 110, width: double.infinity, child: ItemCard(top)),
-        const SizedBox(height: 16),
-        SizedBox(height: 110, width: double.infinity, child: ItemCard(bottom)),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
