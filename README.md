@@ -2,7 +2,7 @@
 
 Proyek Individu mata kuliah **PBP** Semester Gasal 2026/2027. \
 Aplikasi ini adalah perluasan dari website portofolio saya. \
-Repositori web berada di link berikut [ini](https://github.com/jendoraa/myportofolio-mobile.git).
+Repositori web berada di link berikut [ini](https://github.com/jendoraa/myportofolio).
 
 ![Flutter](https://img.shields.io/badge/Flutter-02569B?logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-0175C2?logo=dart&logoColor=white)
@@ -25,8 +25,14 @@ Repositori web berada di link berikut [ini](https://github.com/jendoraa/myportof
 myportofolio_mobile/
 |   ...
 ├── lib/
-│   ├── main.dart    # Bootstrap aplikasi (MaterialApp)
-│   └── menu.dart    # MyHomePage
+|   ├── screens/
+|   |   ├── experience_form.dart
+│   |   ├── menu.dart
+|   |   └── project_form.dart
+|   ├── widgets/
+|   |   ├── left_drawer.dart
+|   |   └── project_card.dart
+│   └── main.dart
 |   ...
 ├── pubspec.yaml
 └── README.md
@@ -59,7 +65,17 @@ flutter run
 - Mengganti informasi di profil
 - Membuat variasi dari komponen-komponen sebelumny
 
-<!-- Minggu berikutnya, ### Tugas 8: [Topik - ... -->
+### Tutorial 09: Flutter Navigation, Layouts, Forms, and Input Elements
+- Membuat navigasi pada Flutter
+- Atur layout pada Flutter
+- Membuat Form Project
+
+### Tugas 8: Flutter Navigation, Layouts, Forms, and Input Elements
+- Menambah form untuk experience
+- Atur layout home
+- buat validasi form experience
+
+<!-- Minggu berikutnya, ### Tugas 9: [Topik - ... -->
 
 ---
 
@@ -103,12 +119,41 @@ flutter run
     Hot reload:membawa perubahan kode ke aplikasi yang sedang jalan, tanpa mengulang dari awal, cepat, dan state aplikasinya tetap tersimpan. \
     Hot restart: menjalankan ulang aplikasi dari awal di Flutter, sehingga semua state kembali ke kondisi awal. Lebih lambat dari hot reload, tapi lebih cepat dari build penuh.
 
-NETSOS{ez_daef7af36b76d14d}
+
+### Tugas 8
+
+1. **Perbedaan `Navigator.push()`, `Navigator.pushReplacement()`, dan `Navigator.pop()`**
+
+   -> `push()` menaruh halaman baru di atas halaman yang sedang tampil. Halaman lama tetap ada di stack, jadi pengguna bisa kembali. \
+   -> `pushReplacement()` mengganti halaman yang sedang tampil dengan halaman baru. Halaman lama dibuang dari stack, jadi tidak bisa kembali ke sana. \
+   -> `pop()` membuang halaman paling atas dan kembali ke halaman di bawahnya. Dipakai juga untuk menutup dialog.
+   
+   Untuk membuka formulir dari kartu aksi aku pakai `push()`, supaya pengguna bisa kembali ke halaman utama dengan tombol kembali bawaan. Opsi Home di drawer memakai `pushReplacement()` ke `MyHomePage()`, jadi halaman formulir yang sedang terbuka digantikan oleh halaman utama.
+
+2. **Susunan Struktur Halaman Tetap Konsisten**
+
+   _Scaffold_ jadi kerangka tiap halaman, sehingga setiap halaman punya struktur yang sama. _AppBar_ menjaga identitas visual di bagian atas, dan _LeftDrawer_ adalah widget yang dipakai ulang di _MyHomePage_, _ProjectFormPage_, dan _ExperienceFormPage_, jadi menu navigasinya selalu sama dan cukup diubah di satu tempat. Contoh warna tema: warna Colors.indigo dipakai di _AppBar_ halaman formulir, header drawer, dan tombol save.
+
+3. Alasan dipilihnya Tata Letak itu
+
+   Formulir disusun dengan _Form > SingleChildScrollView > Column_. Susunan vertikal cocok untuk layar ponsel karena field mengalir ke bawah satu per satu. `SingleChildScrollView()` penting ketika ruang terbatas, keyboard muncul atau layar sempit, isi form bisa digulir sehingga semua field dan tombol save tetap bisa dijangkau tanpa mengalami overflow.
+
+4. Peran `GlobalKey<FormState>`, `validator`, dan `validate()`
+
+   `GlobalKey<FormState>` menghubungkan kode kita ke state Form, sehingga tombol save bisa memanggil `_formKey.currentState!.validate()`.
+
+   `validator` adalah fungsi di tiap field. Hasilnya String _error_ kalau tidak valid, atau _null_ kalau valid.
+
+   `validate()` menjalankan semua `validator` sekaligus. Kalau ada yang mengembalikan pesan, pesannya tampil di kolom terkait dan fungsi mengembalikan false, sehingga dialog tidak muncul. Dialog baru tampil kalau semuanya true.
+   
+   Contoh nilai yang ditolak: posisi berisi " " (hanya spasi) ditolak karena divalidasi dengan `trim().isEmpty`. Contoh lain: tanggal selesai yang lebih awal dari tanggal mulai. Keyboard teks tetap membolehkan spasi saja, dan date picker tidak tahu hubungan antara dua tanggal, jadi aturan seperti ini hanya bisa dicek lewat `validator`.
 
 ## AI Disclosure
 
 ### Tools yang digunakan
 - ChatGPT - Free
+- Ai Overview
+- Gemini - Hydrogen
 
 ### Strategi prompting
 Memberi sebagian kode untuk dipahami kemudian menanyakan konteks dan memahaminya terlebih dahulu sebelum diimplementasikan ke kode, tanyakan lagi jika merasa kurang memahami / hasil ambigu.
@@ -116,14 +161,21 @@ Memberi sebagian kode untuk dipahami kemudian menanyakan konteks dan memahaminya
 ### Bagian yang dibantu AI
 | Bagian | Bentuk bantuan |
 |---|---|
-| [Struktur README] | membuat template README yang profesional |
-| [Variasi Snackbar] | membuat variasi snackbar baru dari tutorial |
+| Struktur README | membuat template README yang profesional |
+| Variasi Snackbar | membuat variasi snackbar baru dari tutorial |
+| Logout | membuat tombol logout berfungsi |
+| Kolom Tanggal | membuat kolom form tanggal yang tinggal pilih tanggal |
 
 ### Log chat / prompt
 - https://chatgpt.com/share/6af73808-ff9c-83ec-ad63-c6577b1d2be7 - 11 November 2026
+- https://share.google/aimode/oLH1PkMvGldrWXkgV - 22 November 2026
+- https://share.gemini.google/U5YiBPAhlZTj - 22 November 2026
 
 ### Keterbatasan AI yang saya temui
-1. (ga ada si, lagi jago)
-
+1. **Menjalankan testing**, 
+   
+   AI tidak bisa menjalankan testing seperti `flutter analyze`, sehingga kita tetap perlu mengujinya secara mandiri. 
 ### Perbaikan manual yang saya lakukan
-1. 
+1. **Debug**,
+
+   menyesuaikan nama import, file yang hasilnya berbeda dari ai generated
