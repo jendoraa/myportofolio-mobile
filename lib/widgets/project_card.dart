@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:myportofolio_mobile/screens/menu.dart';
 import 'package:myportofolio_mobile/screens/project_form.dart';
 
+import 'package:flutter/services.dart';
+
 class ItemCard extends StatelessWidget {
   final ItemHomepage item;
 
@@ -31,6 +33,24 @@ class ItemCard extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder: (context) => const ProjectFormPage(),
+              ),
+            );
+          } else if (item.name == "Logout") {
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('Konfirmasi'),
+                content: const Text('Apakah Anda yakin ingin keluar dari aplikasi?'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context), // Tutup dialog
+                    child: const Text('Batal'),
+                  ),
+                  TextButton(
+                    onPressed: () => SystemNavigator.pop(), // Keluar aplikasi
+                    child: const Text('Keluar'),
+                  ),
+                ],
               ),
             );
           }
