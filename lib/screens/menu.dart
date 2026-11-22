@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
-import 'package:myportofolio_mobile/widgets/project_card.dart';
+import 'package:myportofolio_mobile/widgets/home_card.dart';
 
 class ItemHomepage {
   final String name;
@@ -14,14 +14,26 @@ class MyHomePage extends StatelessWidget {
   MyHomePage({super.key});
 
   final String npm = "2506596874";
-  final String nama = "Rajendra Akbar Mahdiansyah";
+  final String nama = "Rajendra Akbar M";
   final String kelas = "PBP C";
 
   final List<ItemHomepage> items = [
     ItemHomepage("Lihat Proyek", Icons.folder, Colors.green),
-    ItemHomepage("Tambah Proyek", Icons.add_circle, Colors.yellowAccent),
+    ItemHomepage("Tambah Proyek", Icons.add_circle, Colors.green),
+    ItemHomepage("Lihat Pengalaman", Icons.folder, Colors.blue),
+    ItemHomepage("Tambah Pengalaman", Icons.add_circle, Colors.blue),
     ItemHomepage("Logout", Icons.logout, Colors.red),
   ];
+
+  Widget _buildGroup(ItemHomepage top, ItemHomepage bottom) {
+    return Column(
+      children: [
+        SizedBox(height: 110, width: double.infinity, child: ItemCard(top)),
+        const SizedBox(height: 16),
+        SizedBox(height: 110, width: double.infinity, child: ItemCard(bottom)),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,48 +60,52 @@ class MyHomePage extends StatelessWidget {
         iconTheme: const IconThemeData(color: Colors.white), // Agar ikon hamburger drawer putih
       ),
       drawer: const LeftDrawer(),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                InfoCard(title: 'NPM', content: npm),
-                InfoCard(title: 'Name', content: nama),
-                InfoCard(title: 'Class', content: kelas),
-              ],
-            ),
-            const SizedBox(height: 16.0),
-            Center(
-              child: Column(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.only(top: 16.0),
-                    child: Text(
-                      'Selamat datang di MyPortfolio Mobile!',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18.0,
-                      ),
-                    ),
-                  ),
-                  GridView.count(
-                    primary: true,
-                    padding: const EdgeInsets.all(20),
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    crossAxisCount: 3,
-                    shrinkWrap: true,
-                    children: items.map((ItemHomepage item) {
-                      return ItemCard(item);
-                    }).toList(),
-                  ),
+                  InfoCard(title: 'NPM', content: npm),
+                  InfoCard(title: 'Name', content: nama),
+                  InfoCard(title: 'Class', content: kelas),
                 ],
               ),
-            ),
-          ],
+              const SizedBox(height: 16.0),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    // 4 Item pertama (2x2)
+                    GridView.count(
+                      primary: false,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                      crossAxisCount: 2,
+                      shrinkWrap: true,
+                      children: items.take(4).map((ItemHomepage item) {
+                        return ItemCard(item);
+                      }).toList(),
+                    ),
+                    
+                    const SizedBox(height: 10), // Jarak antara grid dan item ke-5
+
+                    // Item ke-5 (Lebar penuh di bawah)
+                    if (items.length > 4)
+                      SizedBox(
+                        width: double.infinity,
+                        height: 150, // Sesuaikan tinggi kotak ke-5 agar serasi dengan kotak di atasnya
+                        child: ItemCard(items[4]),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
