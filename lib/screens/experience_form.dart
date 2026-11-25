@@ -19,11 +19,7 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
   bool _isActive = false;
   String _description = "";
 
-  final List<String> _types = [
-    'Organisasi',
-    'Kepanitiaan',
-    'Asisten Dosen',
-  ];
+  final List<String> _types = ['Organisasi', 'Kepanitiaan', 'Asisten Dosen'];
 
   String _formatDate(DateTime date) {
     final d = date.day.toString().padLeft(2, '0');
@@ -54,11 +50,7 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Center(
-          child: Text(
-            'Add Experience Form',
-          ),
-        ),
+        title: const Center(child: Text('Add Experience Form')),
         backgroundColor: Colors.indigo,
         foregroundColor: Colors.white,
       ),
@@ -69,7 +61,6 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               // === Position ===
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -138,10 +129,10 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
                   ),
                   initialValue: _type,
                   items: _types
-                      .map((type) => DropdownMenuItem(
-                            value: type,
-                            child: Text(type),
-                          ))
+                      .map(
+                        (type) =>
+                            DropdownMenuItem(value: type, child: Text(type)),
+                      )
                       .toList(),
                   onChanged: (String? newValue) {
                     setState(() {
@@ -235,8 +226,8 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
                         _isActive
                             ? "Sekarang"
                             : (_endDate == null
-                                ? "Pilih tanggal selesai"
-                                : _formatDate(_endDate!)),
+                                  ? "Pilih tanggal selesai"
+                                  : _formatDate(_endDate!)),
                       ),
                     ),
                   ),
@@ -270,8 +261,7 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
                   padding: const EdgeInsets.all(8.0),
                   child: ElevatedButton(
                     style: ButtonStyle(
-                      backgroundColor:
-                          WidgetStateProperty.all(Colors.indigo),
+                      backgroundColor: WidgetStateProperty.all(Colors.indigo),
                     ),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
@@ -280,17 +270,16 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
                           builder: (context) {
                             return AlertDialog(
                               title: const Text(
-                                  'Pengalaman berhasil ditambahkan!'),
+                                'Pengalaman berhasil ditambahkan!',
+                              ),
                               content: SingleChildScrollView(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text('Posisi: ${_position.trim()}'),
-                                    Text(
-                                        'Organisasi: ${_organization.trim()}'),
+                                    Text('Organisasi: ${_organization.trim()}'),
                                     Text('Tipe: $_type'),
-                                    Text(
-                                        'Mulai: ${_formatDate(_startDate!)}'),
+                                    Text('Mulai: ${_formatDate(_startDate!)}'),
                                     Text(
                                       'Selesai: ${_isActive ? "Sekarang" : _formatDate(_endDate!)}',
                                     ),

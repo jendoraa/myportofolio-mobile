@@ -31,11 +31,7 @@ class MyHomePage extends StatelessWidget {
       appBar: AppBar(
         title: Row(
           children: [
-            Image.asset(
-              'assets/images/logo.png',
-              height: 35,
-              width: 35,
-            ),
+            Image.asset('assets/images/logo.png', height: 35, width: 35),
             const SizedBox(width: 10),
             const Text(
               'MyPortfolio',
@@ -47,7 +43,9 @@ class MyHomePage extends StatelessWidget {
           ],
         ),
         backgroundColor: Theme.of(context).colorScheme.primary,
-        iconTheme: const IconThemeData(color: Colors.white), // Agar ikon hamburger drawer putih
+        iconTheme: const IconThemeData(
+          color: Colors.white,
+        ), // Agar ikon hamburger drawer putih
       ),
       drawer: const LeftDrawer(),
       body: SingleChildScrollView(
@@ -81,9 +79,10 @@ class MyHomePage extends StatelessWidget {
                         return ItemCard(item);
                       }).toList(),
                     ),
-                    
-                    const SizedBox(height: 10), // Jarak antara grid dan item ke-5
 
+                    const SizedBox(
+                      height: 10,
+                    ), // Jarak antara grid dan item ke-5
                     // Item ke-5 (Lebar penuh di bawah)
                     if (items.length > 4)
                       SizedBox(
@@ -117,10 +116,7 @@ class InfoCard extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Text(
-              title,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8.0),
             Text(content),
           ],

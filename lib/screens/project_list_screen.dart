@@ -70,7 +70,10 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
               onRefresh: _reload,
               child: const SingleChildScrollView(
                 physics: AlwaysScrollableScrollPhysics(),
-                child: SizedBox(height: 300, child: Center(child: Text('No projects found.'))),
+                child: SizedBox(
+                  height: 300,
+                  child: Center(child: Text('No projects found.')),
+                ),
               ),
             );
           }
@@ -85,11 +88,15 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
                 return Card(
                   child: ListTile(
                     title: Text(project.title),
-                    subtitle: Text('${project.techStack}\n${project.description}'),
+                    subtitle: Text(
+                      '${project.techStack}\n${project.description}',
+                    ),
                     isThreeLine: true,
                     onTap: () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => ProjectDetailScreen(project: project)),
+                      MaterialPageRoute(
+                        builder: (_) => ProjectDetailScreen(project: project),
+                      ),
                     ),
                   ),
                 );

@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:myportofolio_mobile/screens/menu.dart';
 import 'package:myportofolio_mobile/screens/project_form.dart';
 import 'package:myportofolio_mobile/screens/experience_form.dart';
-
-import 'package:flutter/services.dart';
+import 'package:myportofolio_mobile/services/auth_state.dart';
+import 'package:myportofolio_mobile/widgets/auth_guard.dart';
+import 'package:provider/provider.dart';
 
 class ItemCard extends StatelessWidget {
   final ItemHomepage item;
@@ -16,8 +17,9 @@ class ItemCard extends StatelessWidget {
       color: item.color,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
-        onTap: () {
-          ScaffoldMessenger.of(context)
+        onTap: () async {
+          final messenger = ScaffoldMessenger.of(context);
+          messenger
             ..hideCurrentSnackBar()
             ..showSnackBar(
               SnackBar(
@@ -28,13 +30,13 @@ class ItemCard extends StatelessWidget {
               ),
             );
 
-          // Navigasi ke halaman form sesuai instruksi halaman 25
           if (item.name == "Tambah Proyek") {
+            // Dilindungi: wajib login dulu
+            final loggedIn = await ensureLoggedIn(context);
+            if (!context.mounted || !loggedIn) return;
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) => const ProjectFormPage(),
-              ),
+              MaterialPageRoute(builder: (context) => const ProjectFormPage()),
             );
           } else if (item.name == "Tambah Pengalaman") {
             Navigator.push(
@@ -44,23 +46,40 @@ class ItemCard extends StatelessWidget {
               ),
             );
           } else if (item.name == "Logout") {
-            showDialog(
+            final auth = context.read<AuthState>();
+
+            if (!auth.isLoggedIn) {
+              messenger
+                ..hideCurrentSnackBar()
+                ..showSnackBar(
+                  const SnackBar(content: Text('Kamu belum login.')),
+                );
+              return;
+            }
+
+            final confirmed = await showDialog<bool>(
               context: context,
-              builder: (context) => AlertDialog(
+              builder: (dialogContext) => AlertDialog(
                 title: const Text('Konfirmasi'),
-                content: const Text('Apakah Anda yakin ingin keluar dari aplikasi?'),
+                content: const Text('Apakah Anda yakin ingin logout?'),
                 actions: [
                   TextButton(
-                    onPressed: () => Navigator.pop(context), // Tutup dialog
+                    onPressed: () => Navigator.pop(dialogContext, false),
                     child: const Text('Batal'),
                   ),
                   TextButton(
-                    onPressed: () => SystemNavigator.pop(), // Keluar aplikasi
-                    child: const Text('Keluar'),
+                    onPressed: () => Navigator.pop(dialogContext, true),
+                    child: const Text('Logout'),
                   ),
                 ],
               ),
             );
+            if (confirmed != true) return;
+
+            await auth.logout();
+            messenger
+              ..hideCurrentSnackBar()
+              ..showSnackBar(const SnackBar(content: Text('Berhasil logout.')));
           }
         },
         child: Container(
@@ -69,11 +88,7 @@ class ItemCard extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  item.icon,
-                  color: Colors.white,
-                  size: 30.0,
-                ),
+                Icon(item.icon, color: Colors.white, size: 30.0),
                 const Padding(padding: EdgeInsets.all(3)),
                 Text(
                   item.name,
