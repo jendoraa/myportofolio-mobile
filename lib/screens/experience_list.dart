@@ -131,17 +131,6 @@ class _ExperienceListScreenState extends State<ExperienceListScreen> {
                     isThreeLine: true,
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          experience.isStarred
-                              ? Icons.star
-                              : Icons.star_border,
-                          size: 18,
-                          color: Colors.amber[700],
-                        ),
-                        const SizedBox(width: 4),
-                        Text('${experience.starCount}'),
-                      ],
                     ),
                     onTap: () async {
                       final changed = await Navigator.push<bool>(

@@ -65,20 +65,6 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
               Text('Thumbnail URL: ${_experience.thumbnail}'),
             ],
             const SizedBox(height: 12),
-            Row(
-              children: [
-                Icon(
-                  _experience.isStarred ? Icons.star : Icons.star_border,
-                  color: Colors.amber[700],
-                ),
-                const SizedBox(width: 6),
-                Text('Stars: ${_experience.starCount}'),
-              ],
-            ),
-            if (_experience.starredByNames.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Text('Disukai oleh: ${_experience.starredByNames}'),
-            ],
             if (_experience.id != null) ...[
               const SizedBox(height: 12),
               Text(

@@ -13,9 +13,6 @@ class Experience {
     this.thumbnail = '',
     required this.startedAt,
     this.endedAt,
-    this.starCount = 0,
-    this.isStarred = false,
-    this.starredByNames = '',
   });
 
   factory Experience.fromJson(Map<String, dynamic> json) =>
@@ -31,11 +28,6 @@ class Experience {
   final String startedAt;
   final String? endedAt;
   @JsonKey(includeToJson: false, defaultValue: 0)
-  final int starCount;
-  @JsonKey(includeToJson: false, defaultValue: false)
-  final bool isStarred;
-  @JsonKey(includeToJson: false, defaultValue: '')
-  final String starredByNames;
 
   bool get isOngoing => endedAt == null || endedAt!.isEmpty;
 

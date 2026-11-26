@@ -1,5 +1,11 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:myportofolio_mobile/models/experience.dart';
+import 'package:myportofolio_mobile/screens/experience_list.dart';
+import 'package:myportofolio_mobile/services/auth_state.dart';
+import 'package:myportofolio_mobile/services/api_client.dart';
+import 'package:myportofolio_mobile/widgets/auth_guard.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
+import 'package:provider/provider.dart';
 
 class ExperienceFormPage extends StatefulWidget {
   const ExperienceFormPage({super.key});
@@ -11,15 +17,14 @@ class ExperienceFormPage extends StatefulWidget {
 class _ExperienceFormPageState extends State<ExperienceFormPage> {
   final _formKey = GlobalKey<FormState>();
 
-  String _position = "";
-  String _organization = "";
-  String _type = "Organisasi"; // default
-  DateTime? _startDate;
-  DateTime? _endDate;
-  bool _isActive = false;
+  String _title = "";
   String _description = "";
-
-  final List<String> _types = ['Organisasi', 'Kepanitiaan', 'Asisten Dosen'];
+  String _position = "";
+  String _thumbnail = ""; // default
+  DateTime? _startedAt;
+  DateTime? _endedAt;
+  bool _isOngoing = false;
+  bool _isSubmitting = false;
 
   String _formatDate(DateTime date) {
     final d = date.day.toString().padLeft(2, '0');
@@ -29,7 +34,7 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
 
   Future<void> _pickDate({required bool isStart}) async {
     final now = DateTime.now();
-    final current = isStart ? _startDate : _endDate;
+    final current = isStart ? _startedAt : _endedAt;
     final picked = await showDatePicker(
       context: context,
       initialDate: current ?? now,
@@ -39,12 +44,134 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
     if (picked == null || !mounted) return;
     setState(() {
       if (isStart) {
-        _startDate = picked;
+        _startedAt = picked;
       } else {
-        _endDate = picked;
+        _endedAt = picked;
       }
     });
   }
+
+  bool _isValidUrl(String value) {
+    final uri = Uri.tryParse(value.trim());
+    return uri != null &&
+        (uri.scheme == 'http' || uri.scheme == 'https') &&
+        uri.host.isNotEmpty;
+  }
+
+  void _snack(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    if (!await ensureLoggedIn(context)) return;
+    if (!mounted) return;
+
+    final auth = context.read<AuthState>();
+    final api = context.read<ApiClient>();
+    final token = auth.token!;
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    final newExperience = Experience(
+      title: _title.trim(),
+      description: _description.trim(),
+      position: _position.trim(),
+      thumbnail: _thumbnail.trim(),
+      startedAt: _formatDate(_startedAt!),
+      endedAt: _isOngoing ? null : _formatDate(_endedAt!),
+    );
+
+    try {
+      await api.createExperience(newExperience, token: token);
+      if (!mounted) return;
+
+      final goToList = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Pengalaman berhasil ditambahkan!'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Judul: ${newExperience.title}'),
+                Text('Posisi: ${newExperience.position}'),
+                Text('Mulai: ${newExperience.startedAt}'),
+                Text(
+                  'Selesai: ${newExperience.isOngoing ? 'Sekarang' : newExperience.endedAt}',
+                ),
+                Text('Deskripsi: ${newExperience.description}'),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Tambah Lagi'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('Lihat Daftar'),
+            ),
+          ],
+        ),
+      );
+
+      if (!mounted) return;
+      if (goToList == true) {
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context, true);
+        } else {
+          await Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const ExperienceListScreen()),
+          );
+        }
+        return;
+      }
+
+      _formKey.currentState!.reset();
+      setState(() {
+        _title = "";
+        _position = "";
+        _description = "";
+        _thumbnail = "";
+        _startedAt = null;
+        _endedAt = null;
+        _isOngoing = false;
+      });
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      if (e.statusCode == 401) {
+        await auth.logout();
+        if (!mounted) return;
+        _snack('Sesi habis (401). Silakan login ulang.');
+        await ensureLoggedIn(context);
+      } else {
+        _snack('Gagal menyimpan pengalaman (${e.statusCode}).');
+      }
+    } catch (_) {
+      if (!mounted) return;
+      _snack('Tidak dapat terhubung ke server.');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
+  }
+
+  InputDecoration _decoration(String hint, String label) => InputDecoration(
+    hintText: hint,
+    labelText: label,
+    border: OutlineInputBorder(borderRadius: BorderRadius.circular(5.0)),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -61,83 +188,38 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // === Title ===
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextFormField(
+                  decoration: _decoration('Contoh: BEM Fasilkom UI', 'Judul Pengalaman'),
+                  onChanged: (String? value) => _title = value ?? "",
+                  validator: (String? value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return "Judul Pengalaman tidak boleh kosong!";
+                    }
+                    if (value.trim().length > 60) {
+                      return "Judul maksimal 60 karakter!";
+                    }
+                    return null;
+                  },
+                ),
+              ),
+
               // === Position ===
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
-                  decoration: InputDecoration(
-                    hintText: "Contoh: Frontend Developer",
-                    labelText: "Posisi / Jabatan",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                  ),
-                  onChanged: (String? value) {
-                    setState(() {
-                      _position = value!;
-                    });
-                  },
+                  decoration: _decoration("Contoh: Frontend Dev", "Posisi / Jabatan"),
+                  onChanged: (String? value) => _position = value ?? "",
                   validator: (String? value) {
                     if (value == null || value.trim().isEmpty) {
-                      return "Posisi tidak boleh kosong!";
-                    }
-                    if (value.trim().length > 60) {
-                      return "Posisi maksimal 60 karakter!";
-                    }
-                    return null;
-                  },
-                ),
-              ),
-
-              // === Organization ===
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    hintText: "Contoh: BEM Fasilkom",
-                    labelText: "Organisasi / Perusahaan",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                  ),
-                  onChanged: (String? value) {
-                    setState(() {
-                      _organization = value!;
-                    });
-                  },
-                  validator: (String? value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return "Nama organisasi tidak boleh kosong!";
+                      return "Posisi / jabana tidak boleh kosong!";
                     }
                     if (value.trim().length > 80) {
-                      return "Nama organisasi maksimal 80 karakter!";
+                      return "Posisi maksimal 80 karakter!";
                     }
                     return null;
-                  },
-                ),
-              ),
-
-              // === Type ===
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: DropdownButtonFormField<String>(
-                  decoration: InputDecoration(
-                    labelText: "Tipe Pengalaman",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                  ),
-                  initialValue: _type,
-                  items: _types
-                      .map(
-                        (type) =>
-                            DropdownMenuItem(value: type, child: Text(type)),
-                      )
-                      .toList(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _type = newValue!;
-                    });
                   },
                 ),
               ),
@@ -146,20 +228,21 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: FormField<DateTime>(
+                  initialValue: _startedAt,
                   validator: (_) {
-                    if (_startDate == null) {
-                      return "Tanggal mulai tidak boleh kosong!";
+                    if (_startedAt == null) {
+                      return 'Tanggal mulai tidak boleh kosong';
                     }
                     return null;
                   },
                   builder: (state) => InkWell(
                     onTap: () async {
                       await _pickDate(isStart: true);
-                      state.didChange(_startDate); // hapus pesan error lama
+                      state.didChange(_startedAt);
                     },
                     child: InputDecorator(
                       decoration: InputDecoration(
-                        labelText: "Tanggal Mulai",
+                        labelText: 'Tanggal Mulai',
                         suffixIcon: const Icon(Icons.calendar_today),
                         errorText: state.errorText,
                         border: OutlineInputBorder(
@@ -167,25 +250,25 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
                         ),
                       ),
                       child: Text(
-                        _startDate == null
-                            ? "Pilih tanggal mulai"
-                            : _formatDate(_startDate!),
+                        _startedAt == null
+                            ? 'Pilih tanggal mulai'
+                            : _formatDate(_startedAt!),
                       ),
                     ),
                   ),
                 ),
               ),
 
-              // === Is Active ===
+              // === Is Ongoing ===
               SwitchListTile(
                 title: const Text("Masih aktif"),
-                value: _isActive,
+                value: _isOngoing,
                 activeThumbColor: Colors.indigo,
                 onChanged: (bool value) {
                   setState(() {
-                    _isActive = value;
+                    _isOngoing = value;
                     if (value) {
-                      _endDate = null;
+                      _endedAt = null;
                     }
                   });
                 },
@@ -196,38 +279,38 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
                 padding: const EdgeInsets.all(8.0),
                 child: FormField<DateTime>(
                   validator: (_) {
-                    if (_isActive) return null;
-                    if (_endDate == null) {
+                    if (_isOngoing) return null;
+                    if (_endedAt == null) {
                       return "Tanggal selesai tidak boleh kosong!";
                     }
-                    if (_startDate != null && _endDate!.isBefore(_startDate!)) {
+                    if (_startedAt != null && _endedAt!.isBefore(_startedAt!)) {
                       return "Tanggal selesai tidak boleh sebelum tanggal mulai!";
                     }
                     return null;
                   },
                   builder: (state) => InkWell(
-                    onTap: _isActive
+                    onTap: _isOngoing
                         ? null
                         : () async {
                             await _pickDate(isStart: false);
-                            state.didChange(_endDate); // hapus pesan error lama
+                            state.didChange(_endedAt); // hapus pesan error lama
                           },
                     child: InputDecorator(
                       decoration: InputDecoration(
                         labelText: "Tanggal Selesai",
-                        enabled: !_isActive,
+                        enabled: !_isOngoing,
                         suffixIcon: const Icon(Icons.calendar_today),
-                        errorText: _isActive ? null : state.errorText,
+                        errorText: _isOngoing ? null : state.errorText,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(5.0),
                         ),
                       ),
                       child: Text(
-                        _isActive
+                        _isOngoing
                             ? "Sekarang"
-                            : (_endDate == null
+                            : (_endedAt == null
                                   ? "Pilih tanggal selesai"
-                                  : _formatDate(_endDate!)),
+                                  : _formatDate(_endedAt!)),
                       ),
                     ),
                   ),
@@ -239,17 +322,30 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
                   maxLines: 5,
-                  decoration: InputDecoration(
-                    hintText: "Deskripsi Pengalaman",
-                    labelText: "Deskripsi Pengalaman",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                  ),
-                  onChanged: (String? value) {
-                    setState(() {
-                      _description = value!;
-                    });
+                  decoration: _decoration("Deskripsi Pengalaman", "Deskripsi Pengalaman"),
+                  onChanged: (String? value) => _description = value ?? "",
+                  validator: (String? value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Deskripsi tidak boleh kosong!';
+                    }
+                    return null;
+                  },
+                  
+                ),
+              ),
+
+              // === Thumbnail URL (Optional) ===
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextFormField(
+                  decoration: _decoration('https://... (opsional)', 'Thumbnail URL (Opsional)'),
+                  onChanged: (String? value) => _thumbnail = value ?? "",
+                  validator: (String? value) {
+                    if (value == null || value.trim().isEmpty) return null;
+                    if (!_isValidUrl(value)) {
+                      return 'URL tidak valid (pakai http/https)';
+                    }
+                    return null;
                   },
                 ),
               ),
@@ -263,48 +359,20 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
                     style: ButtonStyle(
                       backgroundColor: WidgetStateProperty.all(Colors.indigo),
                     ),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: const Text(
-                                'Pengalaman berhasil ditambahkan!',
-                              ),
-                              content: SingleChildScrollView(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Posisi: ${_position.trim()}'),
-                                    Text('Organisasi: ${_organization.trim()}'),
-                                    Text('Tipe: $_type'),
-                                    Text('Mulai: ${_formatDate(_startDate!)}'),
-                                    Text(
-                                      'Selesai: ${_isActive ? "Sekarang" : _formatDate(_endDate!)}',
-                                    ),
-                                    Text('Deskripsi: ${_description.trim()}'),
-                                  ],
-                                ),
-                              ),
-                              actions: [
-                                TextButton(
-                                  child: const Text('OK'),
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    _formKey.currentState!.reset();
-                                  },
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      }
-                    },
-                    child: const Text(
-                      "Save",
-                      style: TextStyle(color: Colors.white),
-                    ),
+                    onPressed: _isSubmitting ? null : _submit,
+                    child: _isSubmitting
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            'Save',
+                            style: TextStyle(color: Colors.white),
+                          ),
                   ),
                 ),
               ),
