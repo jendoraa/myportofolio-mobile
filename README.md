@@ -6,6 +6,7 @@ Repositori web berada di link berikut [ini](https://github.com/jendoraa/myportof
 
 ![Flutter](https://img.shields.io/badge/Flutter-02569B?logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-0175C2?logo=dart&logoColor=white)
+[![Build Status](https://github.com/jendoraa/myportofolio-mobile/actions/workflows/main.yml/badge.svg)](https://github.com/jendoraa/myportofolio-mobile/actions/workflows/main.yml)
 
 ## Identitas
 
