@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/screens/menu.dart';
+import 'package:myportofolio_mobile/screens/experience_list.dart';
+import 'package:myportofolio_mobile/screens/project_list.dart';
 import 'package:myportofolio_mobile/screens/project_form.dart';
 import 'package:myportofolio_mobile/screens/experience_form.dart';
 import 'package:myportofolio_mobile/services/auth_state.dart';
@@ -29,14 +31,27 @@ class ItemCard extends StatelessWidget {
                 duration: const Duration(seconds: 2),
               ),
             );
-
-          if (item.name == "Tambah Proyek") {
+          if (item.name == "Lihat Proyek") {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ProjectListScreen(),
+              ),
+            );
+          } else if (item.name == "Tambah Proyek") {
             // Dilindungi: wajib login dulu
             final loggedIn = await ensureLoggedIn(context);
             if (!context.mounted || !loggedIn) return;
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const ProjectFormPage()),
+            );
+          } else if (item.name == "Lihat Pengalaman") {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ExperienceListScreen(),
+              ),
             );
           } else if (item.name == "Tambah Pengalaman") {
             Navigator.push(
