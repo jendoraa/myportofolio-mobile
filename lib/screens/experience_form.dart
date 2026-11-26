@@ -192,7 +192,10 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
-                  decoration: _decoration('Contoh: BEM Fasilkom UI', 'Judul Pengalaman'),
+                  decoration: _decoration(
+                    'Contoh: BEM Fasilkom UI',
+                    'Judul Pengalaman',
+                  ),
                   onChanged: (String? value) => _title = value ?? "",
                   validator: (String? value) {
                     if (value == null || value.trim().isEmpty) {
@@ -210,7 +213,10 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
-                  decoration: _decoration("Contoh: Frontend Dev", "Posisi / Jabatan"),
+                  decoration: _decoration(
+                    "Contoh: Frontend Dev",
+                    "Posisi / Jabatan",
+                  ),
                   onChanged: (String? value) => _position = value ?? "",
                   validator: (String? value) {
                     if (value == null || value.trim().isEmpty) {
@@ -322,7 +328,10 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
                   maxLines: 5,
-                  decoration: _decoration("Deskripsi Pengalaman", "Deskripsi Pengalaman"),
+                  decoration: _decoration(
+                    "Deskripsi Pengalaman",
+                    "Deskripsi Pengalaman",
+                  ),
                   onChanged: (String? value) => _description = value ?? "",
                   validator: (String? value) {
                     if (value == null || value.trim().isEmpty) {
@@ -330,7 +339,6 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
                     }
                     return null;
                   },
-                  
                 ),
               ),
 
@@ -338,7 +346,10 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
-                  decoration: _decoration('https://... (opsional)', 'Thumbnail URL (Opsional)'),
+                  decoration: _decoration(
+                    'https://... (opsional)',
+                    'Thumbnail URL (Opsional)',
+                  ),
                   onChanged: (String? value) => _thumbnail = value ?? "",
                   validator: (String? value) {
                     if (value == null || value.trim().isEmpty) return null;

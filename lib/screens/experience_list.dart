@@ -129,9 +129,7 @@ class _ExperienceListScreenState extends State<ExperienceListScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     isThreeLine: true,
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                    ),
+                    trailing: Row(mainAxisSize: MainAxisSize.min),
                     onTap: () async {
                       final changed = await Navigator.push<bool>(
                         context,
