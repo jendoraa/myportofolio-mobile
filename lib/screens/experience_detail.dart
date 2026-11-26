@@ -12,6 +12,12 @@ class ExperienceDetailScreen extends StatefulWidget {
 
 class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
   late Experience _experience;
+  
+  @override
+  void initState() {
+    super.initState();
+    _experience = widget.experience;
+  }
 
   @override
   Widget build(BuildContext context) {

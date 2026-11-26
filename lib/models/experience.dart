@@ -27,7 +27,6 @@ class Experience {
   final String thumbnail;
   final String startedAt;
   final String? endedAt;
-  @JsonKey(includeToJson: false, defaultValue: 0)
   bool get isOngoing => endedAt == null || endedAt!.isEmpty;
 
   Map<String, dynamic> toJson() => _$ExperienceToJson(this);

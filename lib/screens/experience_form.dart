@@ -29,7 +29,7 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
   String _formatDate(DateTime date) {
     final d = date.day.toString().padLeft(2, '0');
     final m = date.month.toString().padLeft(2, '0');
-    return '$d/$m/${date.year}';
+    return '${date.year}/$m/$d';
   }
 
   Future<void> _pickDate({required bool isStart}) async {
@@ -220,10 +220,10 @@ class _ExperienceFormPageState extends State<ExperienceFormPage> {
                   onChanged: (String? value) => _position = value ?? "",
                   validator: (String? value) {
                     if (value == null || value.trim().isEmpty) {
-                      return "Posisi / jabana tidak boleh kosong!";
+                      return "Posisi / jabatan tidak boleh kosong!";
                     }
-                    if (value.trim().length > 80) {
-                      return "Posisi maksimal 80 karakter!";
+                    if (value.trim().length > 20) {
+                      return "Posisi maksimal 20 karakter!";
                     }
                     return null;
                   },
